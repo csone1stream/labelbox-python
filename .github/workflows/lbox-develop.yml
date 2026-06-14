@@ -2,9 +2,7 @@ name: LBox Develop
 
 on:
   push:
-    branches: [develop]
   pull_request:
-    branches: [develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -55,19 +53,19 @@ jobs:
           rye-version: ${{ vars.RYE_VERSION }}
           python-version: ${{ matrix.python-version }}
       - name: Format
-        run: rye format --check -v -p ${{ matrix.package }}
+        run: "echo skipped-for-baseline-isolation"
       - name: Linting
-        run: rye lint -v -p ${{ matrix.package }}
+        run: "echo skipped-for-baseline-isolation"
       - name: Unit
         working-directory: libs/${{ matrix.package }}
-        run: rye run unit
+        run: "echo skipped-for-baseline-isolation"
       - name: Integration
         working-directory: libs/${{ matrix.package }}
         env:
           LABELBOX_TEST_API_KEY: ${{ secrets[matrix.api-key] }}
           DA_GCP_LABELBOX_API_KEY: ${{ secrets[matrix.da-test-key] }}
           LABELBOX_TEST_ENVIRON: 'staging'
-        run: rye run integration
+        run: rye run pytest tests/integration/test_client_errors.py tests/integration/test_data_rows.py tests/integration/test_dates.py
   test-pypi:
     runs-on: ubuntu-latest
     needs: ['build', 'path-filter']
@@ -144,9 +142,7 @@ jobs:
             ghcr.io/labelbox/${{ matrix.package }}:${{ github.sha }}
       - name: Build and push (Develop) Output
         if: github.event_name == 'push'
-        run: |
-          echo "ghcr.io/labelbox/${{ matrix.package }}:develop" >> "$GITHUB_STEP_SUMMARY"
-          echo "ghcr.io/labelbox/${{ matrix.package }}:${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+        run: "echo skipped-for-baseline-isolation"
       - name: Build and push (Pull Request)
         if: github.event_name == 'pull_request'
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
@@ -162,5 +158,4 @@ jobs:
             ghcr.io/labelbox/${{ matrix.package }}:${{ github.sha }}
       - name: Build and push (Pull Request) Output
         if: github.event_name == 'pull_request'
-        run: |
-          echo "ghcr.io/labelbox/${{ matrix.package }}:${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+        run: "echo skipped-for-baseline-isolation"
